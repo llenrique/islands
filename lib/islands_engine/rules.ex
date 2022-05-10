@@ -35,6 +35,16 @@ defmodule IslandsEngine.Rules do
     end
   end
 
+  def check(%Rules{state: :player_two_turn} = rules, {:guess_coordinate, :player_two}),
+  do: {:ok, %{rules | state: :player_one_turn}}
+
+  def check(%Rules{state: :player_two_turn} = rules, {:win_check, win_or_not}) do
+    case win_or_not do
+      :no_win -> {:ok, rules}
+      :win -> {:ok, %{rules | state: :game_over}}
+    end
+  end
+
   def check(_state, _action), do: :error
 
   defp _both_players_islands_set?(rules),
