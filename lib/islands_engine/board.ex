@@ -1,8 +1,23 @@
 defmodule IslandsEngine.Board do
+  @moduledoc """
+  A board represents the place where players set their islands and where they
+  make guessess to try to hit the other players islands. The main actions in a board are:
+  1. Position islands
+  2. Check for all islands positioned
+  3. Make coordinate guessess
+  """
   alias IslandsEngine.{Island, Coordinate}
 
+  @doc """
+  Returns an empty map that reperesents the a whole board
+  """
+  @spec new() :: map
   def new(), do: %{}
 
+  @doc """
+  Set an island inton the board
+  """
+  @spec position_island(map, atom, Island.t()) :: map | {:error, :overlapping_island}
   def position_island(board, new_key, %Island{} = new_island) do
     case _overlaps_existing_island(board, new_key, new_island) do
       true -> {:error, :overlapping_island}
