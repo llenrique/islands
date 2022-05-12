@@ -20,9 +20,9 @@ defmodule IslandsEngine.Island do
   @enforce_keys [:coordinates, :hit_coordinates]
 
   @type t() :: %__MODULE__{
-    coordinates: Coordinate.t(),
-    hit_coordinates: Coordinate.t()
-  }
+          coordinates: Coordinate.t(),
+          hit_coordinates: Coordinate.t()
+        }
 
   defstruct [:coordinates, :hit_coordinates]
 
@@ -40,7 +40,8 @@ defmodule IslandsEngine.Island do
   end
 
   # With a given shape, and the initial coordinate, creates the coordinates group for the given island type.
-  @spec _create_coordinates([tuple()], Coordinate.t()) :: MapSet.value(Coordinate.t()) | {:error, :invalid_coordinate}
+  @spec _create_coordinates([tuple()], Coordinate.t()) ::
+          MapSet.value(Coordinate.t()) | {:error, :invalid_coordinate}
   defp _create_coordinates(offsets, upper_left) do
     Enum.reduce_while(offsets, MapSet.new(), fn offset, acc ->
       _add_coordinate(acc, upper_left, offset)
@@ -49,10 +50,10 @@ defmodule IslandsEngine.Island do
 
   #
   defp _add_coordinate(
-    coordinates = _island_coordinates,
-    %Coordinate{row: row, col: col} = _uper_left,
-    {row_offset, col_offset} = _offset
-  ) do
+         coordinates = _island_coordinates,
+         %Coordinate{row: row, col: col} = _uper_left,
+         {row_offset, col_offset} = _offset
+       ) do
     case Coordinate.new(row + row_offset, col + col_offset) do
       {:ok, coordinate} -> {:cont, MapSet.put(coordinates, coordinate)}
       {:error, :invalid_coordinate} -> {:halt, {:error, :invalid_coordinate}}
@@ -64,7 +65,9 @@ defmodule IslandsEngine.Island do
       true ->
         hit_coordinates = MapSet.put(island.hit_coordinates, coordinate)
         {:hit, %{island | hit_coordinates: hit_coordinates}}
-      false -> :miss
+
+      false ->
+        :miss
     end
   end
 
@@ -72,7 +75,6 @@ defmodule IslandsEngine.Island do
 
   def overlaps?(existing_island, new_island),
     do: not MapSet.disjoint?(existing_island.coordinates, new_island.coordinates)
-
 
   def types, do: [:square, :atoll, :dot, :l_shape, :s_shape]
 

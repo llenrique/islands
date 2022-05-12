@@ -15,5 +15,4 @@ defmodule IslandsEngine.Guesses do
   def add(%Guesses{} = guessses, :miss, %Coordinate{} = coordinate) do
     update_in(guessses.misses, &MapSet.put(&1, coordinate))
   end
-
 end

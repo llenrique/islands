@@ -6,9 +6,9 @@ defmodule IslandsEngine.Coordinate do
   @board_range 1..10
 
   @type t() :: %__MODULE__{
-    row: integer(),
-    col: integer()
-  }
+          row: integer(),
+          col: integer()
+        }
 
   defstruct [:row, :col]
 

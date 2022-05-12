@@ -32,7 +32,7 @@ defmodule IslandsEngine.Board do
   end
 
   def all_islands_positioned?(board),
-    do: Enum.all?(Island.types, &Map.has_key?(board, &1))
+    do: Enum.all?(Island.types(), &Map.has_key?(board, &1))
 
   def guess(board, %Coordinate{} = guess_coordinate) do
     board
