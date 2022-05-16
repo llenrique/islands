@@ -19,7 +19,7 @@ defmodule IslandsEngine.Game do
   end
 
   def start_link(name) when is_binary(name) do
-    GenServer.start_link(__MODULE__, name, [])
+    GenServer.start_link(__MODULE__, name, name: vua_tupple(name))
   end
 
   def handle_call({:add_player, name}, _from, state) do
@@ -108,6 +108,8 @@ defmodule IslandsEngine.Game do
 
   def guess_coordinate(game, player, row, col) when player in @players,
     do: GenServer.call(game, {:guess_coordinate, player, row, col})
+
+  def vua_tupple(name), do: {:via, Registry, {Registry.Game, name}}
 
   defp _update_guesses(state, player, coordinate, hit_or_miss) do
     update_in(state[player].guesses, fn guesses ->
