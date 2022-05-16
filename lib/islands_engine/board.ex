@@ -1,10 +1,10 @@
 defmodule IslandsEngine.Board do
   @moduledoc """
   A board represents the place where players set their islands and where they
-  make guessess to try to hit the other players islands. The main actions in a board are:
+  make guesses to try to hit the other players islands. The main actions in a board are:
   1. Position islands
   2. Check for all islands positioned
-  3. Make coordinate guessess
+  3. Make coordinate guesses
   """
   alias IslandsEngine.{Island, Coordinate}
 
@@ -32,7 +32,7 @@ defmodule IslandsEngine.Board do
   end
 
   def all_islands_positioned?(board),
-    do: Enum.all?(Island.types(), &Map.has_key?(board, &1))
+    do: Enum.all?(Island.types, &Map.has_key?(board, &1))
 
   def guess(board, %Coordinate{} = guess_coordinate) do
     board
