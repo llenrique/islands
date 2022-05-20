@@ -4,6 +4,7 @@ defmodule IslandsEngine.Game do
   alias IslandsEngine.{Board, Guesses, Rules, Island, Coordinate}
 
   @players [:player_one, :player_two]
+  @timeout 60 * 60 * 24 * 1000
 
   def init(name) do
     player_one = %{name: name, board: Board.new(), guesses: Guesses.new()}
@@ -15,7 +16,7 @@ defmodule IslandsEngine.Game do
       rules: Rules.new()
     }
 
-    {:ok, state}
+    {:ok, state, @timeout}
   end
 
   def start_link(name) when is_binary(name) do
@@ -84,6 +85,10 @@ defmodule IslandsEngine.Game do
     end
   end
 
+  def handle_info(:timeout, state) do
+    {:stop, {:shutdown, :timeout}, state}
+  end
+
   def add_player(game, name) when is_binary(name) do
     GenServer.call(game, {:add_player, name})
   end
@@ -117,7 +122,7 @@ defmodule IslandsEngine.Game do
     end)
   end
 
-  defp _reply_success(state, reply), do: {:reply, reply, state}
+  defp _reply_success(state, reply), do: {:reply, reply, state, @timeout}
 
   defp _player_board(state, player), do: Map.get(state, player).board
 
