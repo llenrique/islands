@@ -12,7 +12,7 @@ defmodule IslandsEngine.GameSupervisor do
   end
 
   def start_game(name) do
-    spec = %{id: Game, start: {Game, :start_link, [name]}} # Add this spec fix the warning of :simple_one_for_one deprecation
+    spec = Supervisor.child_spec(Game, start: {Game, :start_link, [name]})
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
 
