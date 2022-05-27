@@ -7,20 +7,27 @@ defmodule IslandsEngine.Game do
   @timeout 60 * 60 * 24 * 1000
 
   def init(name) do
-    player_one = %{name: name, board: Board.new(), guesses: Guesses.new()}
-    player_two = %{name: nil, board: Board.new(), guesses: Guesses.new()}
-
-    state = %{
-      player_one: player_one,
-      player_two: player_two,
-      rules: Rules.new()
-    }
-
-    {:ok, state, @timeout}
+    send(self(), {:set_state, name})
+    {:ok, _fresh_state(name)}
   end
 
   def start_link(name) when is_binary(name) do
     GenServer.start_link(__MODULE__, name, name: via_tuple(name))
+  end
+
+  def handle_info(:timeout, state) do
+    {:stop, {:shutdown, :timeout}, state}
+  end
+
+  def handle_info({:set_state, name}, _state) do
+    state =
+      case :ets.lookup(:game_state, name) do
+        [] -> _fresh_state(name)
+        [{_key, state}] -> state
+      end
+
+    :ets.insert(:game_state, {name, state})
+    {:noreply, state, @timeout}
   end
 
   def handle_call({:add_player, name}, _from, state) do
@@ -85,9 +92,6 @@ defmodule IslandsEngine.Game do
     end
   end
 
-  def handle_info(:timeout, state) do
-    {:stop, {:shutdown, :timeout}, state}
-  end
 
   def add_player(game, name) when is_binary(name) do
     GenServer.call(game, {:add_player, name})
@@ -122,7 +126,17 @@ defmodule IslandsEngine.Game do
     end)
   end
 
-  defp _reply_success(state, reply), do: {:reply, reply, state, @timeout}
+  defp _reply_success(state, reply) do
+    :ets.insert(:game_state, {state.player_one.name, state})
+    {:reply, reply, state, @timeout}
+  end
+
+  defp _fresh_state(name) do
+    player_one = %{name: name, board: Board.new(), guesses: Guesses.new()}
+    player_two = %{name: nil, board: Board.new(), guesses: Guesses.new()}
+
+    %{player_one: player_one, player_two: player_two, rules: Rules.new()}
+  end
 
   defp _player_board(state, player), do: Map.get(state, player).board
 
