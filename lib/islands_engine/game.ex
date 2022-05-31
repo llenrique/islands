@@ -8,7 +8,14 @@ defmodule IslandsEngine.Game do
 
   def init(name) do
     send(self(), {:set_state, name})
-    {:ok, _fresh_state(name)}
+    {:ok, _fresh_state(name)} # Regresa un estado donde solo esta el nombre del primer jugador
+  end
+
+  defp _fresh_state(name) do
+    player_one = %{name: name, board: Board.new(), guesses: Guesses.new()}
+    player_two = %{name: nil, board: Board.new(), guesses: Guesses.new()}
+
+    %{player_one: player_one, player_two: player_two, rules: Rules.new()}
   end
 
   def start_link(name) when is_binary(name) do
@@ -29,6 +36,14 @@ defmodule IslandsEngine.Game do
     :ets.insert(:game_state, {name, state})
     {:noreply, state, @timeout}
   end
+
+  def terminate({:shutdown, :timeout}, state) do
+    :ets.delete(:game_state, state.player_one.name)
+    :ok
+  end
+
+  def terminate(_reason, _state), do: :ok
+
 
   def handle_call({:add_player, name}, _from, state) do
     with {:ok, rules} <- Rules.check(state.rules, :add_player) do
@@ -129,13 +144,6 @@ defmodule IslandsEngine.Game do
   defp _reply_success(state, reply) do
     :ets.insert(:game_state, {state.player_one.name, state})
     {:reply, reply, state, @timeout}
-  end
-
-  defp _fresh_state(name) do
-    player_one = %{name: name, board: Board.new(), guesses: Guesses.new()}
-    player_two = %{name: nil, board: Board.new(), guesses: Guesses.new()}
-
-    %{player_one: player_one, player_two: player_two, rules: Rules.new()}
   end
 
   defp _player_board(state, player), do: Map.get(state, player).board
